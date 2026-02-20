@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disability Case Leads | Attorney Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #0b0f1a;
+  --bg:      #f0ede8;
+  --card:    #ffffff;
+  --gold:    #c8973a;
+  --navy:    #0f2847;
+  --hot:     #c0392b;
+  --warm:    #d68910;
+  --cool:    #1a5276;
+  --border:  #ddd9d2;
+  --muted:   #7f8c9a;
+  --success: #1e8449;
+  --r:       12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Manrope', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--navy);
+  padding: 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 3px solid var(--gold);
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-icon {
+  width: 38px; height: 38px;
+  background: var(--gold);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: #fff;
+  letter-spacing: -.2px;
+}
+.logo-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,.45);
+  margin-top: 1px;
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.refresh-btn {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+}
+.refresh-btn:hover { background: rgba(255,255,255,.2); }
+.last-updated {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,.4);
+}
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  background: var(--navy);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  padding: 0 36px 20px;
+}
+.stat-box {
+  text-align: center;
+  padding: 8px 0;
+  border-right: 1px solid rgba(255,255,255,.1);
+}
+.stat-box:last-child { border: none; }
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  color: #fff;
+  line-height: 1;
+}
+.stat-num.hot-c  { color: #e74c3c; }
+.stat-num.warm-c { color: #f39c12; }
+.stat-num.gold-c { color: var(--gold); }
+.stat-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.4);
+  margin-top: 4px;
+}
+
+/* ── TOOLBAR ── */
+.toolbar {
+  padding: 16px 36px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+.pill {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  transition: all .15s;
+  font-family: 'Manrope', sans-serif;
+}
+.pill:hover, .pill.on { border-color: var(--navy); color: var(--navy); background: rgba(15,40,71,.06); }
+.pill.hot-pill.on  { border-color: var(--hot);  color: var(--hot);  background: rgba(192,57,43,.06); }
+.pill.warm-pill.on { border-color: var(--warm); color: var(--warm); background: rgba(214,137,16,.06); }
+.pill.cool-pill.on { border-color: var(--cool); color: var(--cool); background: rgba(26,82,118,.06); }
+.search {
+  margin-left: auto;
+  padding: 8px 16px 8px 36px;
+  border-radius: 20px;
+  border: 2px solid var(--border);
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  width: 240px;
+  outline: none;
+  background: #f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
+  transition: border-color .15s;
+}
+.search:focus { border-color: var(--navy); }
+
+/* ── LOADING ── */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 16px;
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 4px solid var(--border);
+  border-top-color: var(--navy);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading p { font-size: 14px; color: var(--muted); font-weight: 500; }
+
+/* ── ERROR ── */
+.error-box {
+  margin: 30px 36px;
+  background: #fef0f0;
+  border: 1px solid #f5c6c6;
+  border-radius: var(--r);
+  padding: 20px 24px;
+  font-size: 14px;
+  color: var(--hot);
+}
+.error-box strong { display: block; margin-bottom: 6px; font-size: 15px; }
+
+/* ── GRID ── */
+.grid {
+  padding: 24px 36px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 18px;
+}
+.empty {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 60px;
+  color: var(--muted);
+}
+.empty p:first-child { font-size: 36px; margin-bottom: 10px; }
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+  position: relative;
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.1); }
+.card-stripe { height: 4px; }
+.hot-stripe  { background: linear-gradient(90deg, var(--hot), #e74c3c); }
+.warm-stripe { background: linear-gradient(90deg, var(--warm), #f1c40f); }
+.cool-stripe { background: linear-gradient(90deg, var(--cool), #2980b9); }
+
+.card-body { padding: 18px 18px 14px; }
+.card-row1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.card-name { font-size: 16px; font-weight: 800; color: var(--ink); }
+.card-meta-sub { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+/* Score ring */
+.ring-wrap { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
+.ring-wrap svg { position: absolute; top:0; left:0; transform: rotate(-90deg); }
+.ring-inner {
+  position: absolute; inset:0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.ring-num { font-size: 15px; font-weight: 800; line-height: 1; }
+.ring-lbl { font-size: 9px; color: var(--muted); font-weight: 600; }
+
+.condition-tag {
+  display: inline-block;
+  background: rgba(15,40,71,.07);
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tier-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+.tier-tag.hot  { background: #fdecea; color: var(--hot); }
+.tier-tag.warm { background: #fef9e7; color: var(--warm); }
+.tier-tag.cool { background: #eaf4fb; color: var(--cool); }
+
+.card-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.info-cell { font-size: 11px; color: var(--muted); }
+.info-cell strong { display: block; font-size: 12px; color: var(--ink); font-weight: 700; }
+
+.factor-chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px 0 0; border-top: 1px solid var(--border); }
+.chip {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px;
+  background: #f0ede8; color: var(--ink);
+}
+.chip.warn { background: #fdecea; color: var(--hot); }
+
+.card-footer {
+  display: flex;
+  gap: 8px;
+  padding: 10px 18px 14px;
+  border-top: 1px solid var(--border);
+}
+.btn { flex:1; padding:8px; border-radius:6px; font-family:'Manrope',sans-serif; font-size:12px; font-weight:700; cursor:pointer; border:none; transition:opacity .15s; }
+.btn:hover { opacity:.8; }
+.btn-p { background: var(--navy); color:#fff; }
+.btn-o { background: transparent; border:1.5px solid var(--border); color:var(--ink); }
+
+/* ── MODAL ── */
+.overlay {
+  display: none; position: fixed; inset:0;
+  background: rgba(11,15,26,.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 580px; width:100%;
+  max-height: 90vh; overflow-y:auto;
+  box-shadow: 0 40px 100px rgba(0,0,0,.25);
+  position: relative;
+}
+.modal-header {
+  background: var(--navy);
+  padding: 24px 28px 20px;
+  border-radius: 16px 16px 0 0;
+  position: relative;
+}
+.modal-header h2 { font-family:'Playfair Display',serif; font-size:22px; color:#fff; }
+.modal-header p  { font-size:12px; color:rgba(255,255,255,.5); margin-top:4px; font-family:'DM Mono',monospace; }
+.mclose {
+  position:absolute; top:16px; right:20px;
+  background: rgba(255,255,255,.15); border:none; color:#fff;
+  width:30px; height:30px; border-radius:50%;
+  font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.modal-body { padding: 24px 28px; }
+
+.score-hero {
+  display: flex; align-items: center; gap: 20px;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 22px;
+}
+.score-big { font-family:'Playfair Display',serif; font-size:56px; line-height:1; }
+.score-grade { font-size:24px; font-weight:800; margin-top:4px; }
+.score-bar-wrap { flex:1; }
+.score-bar-label { font-size:11px; color:var(--muted); font-weight:600; margin-bottom:6px; }
+.bar-bg { height:12px; background:var(--border); border-radius:6px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:6px; transition:width .6s ease; }
+.score-desc { font-size:12px; color:var(--muted); margin-top:6px; }
+
+.msect { margin-bottom: 20px; }
+.msect-title {
+  font-size: 10px; font-weight:800; letter-spacing:1px;
+  text-transform:uppercase; color:var(--muted);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.ditem { font-size:12px; color:var(--muted); }
+.ditem strong { display:block; font-size:13px; color:var(--ink); font-weight:700; margin-top:1px; }
+
+.factor-list { list-style:none; }
+.factor-list li {
+  display:flex; align-items:flex-start; gap:8px;
+  font-size:13px; padding:6px 0;
+  border-bottom:1px solid var(--border);
+}
+.factor-list li:last-child { border:none; }
+.fi { font-size:14px; flex-shrink:0; margin-top:1px; }
+
+.modal-actions { display:flex; gap:10px; margin-top:20px; }
+.modal-actions .btn { padding:12px; font-size:13px; }
+
+@media (max-width:640px) {
+  .topbar { padding: 0 16px; }
+  .stats-row { grid-template-columns: repeat(3,1fr); padding: 0 16px 16px; gap: 0; }
+  .toolbar { padding: 12px 16px; }
+  .grid { padding: 16px; }
+  .search { width:100%; }
+  .modal-body { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">⚖️</div>
+    <div>
+      <div class="logo-text">Disability Case Leads</div>
+      <div class="logo-sub">ATTORNEY REFERRAL DASHBOARD — CONFIDENTIAL</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="last-updated" id="lastUpdated">Loading...</div>
+    <button class="refresh-btn" onclick="loadLeads()">↻ Refresh</button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="stat-num" id="s-total">—</div>
+    <div class="stat-lbl">Total Leads</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num hot-c" id="s-hot">—</div>
+    <div class="stat-lbl">Hot Leads</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num warm-c" id="s-warm">—</div>
+    <div class="stat-lbl">Warm Leads</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num gold-c" id="s-avg">—</div>
+    <div class="stat-lbl">Avg Score</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num" id="s-top" style="color:#fff">—</div>
+    <div class="stat-lbl">Top Score</div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="pill on"       data-f="all"  onclick="setFilter(this,'all')">All Leads</button>
+  <button class="pill hot-pill" data-f="hot"  onclick="setFilter(this,'hot')">🔴 Hot Only</button>
+  <button class="pill warm-pill"data-f="warm" onclick="setFilter(this,'warm')">🟡 Warm</button>
+  <button class="pill cool-pill"data-f="cool" onclick="setFilter(this,'cool')">🔵 Low Priority</button>
+  <input class="search" id="searchBox" placeholder="Search name, condition, state…" oninput="render()">
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="mainContent">
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Loading live data from Google Sheets…</p>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="mclose" onclick="closeModal()">✕</button>
+      <h2 id="mName">—</h2>
+      <p id="mSub">—</p>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG — UPDATE THIS URL AFTER YOU REDEPLOY YOUR APPS SCRIPT ──────────────
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxI9gWvKnXt7E66K144fY44HfXEGYfgnm8vjFXn1VB5zOASAbcOgzk4dKiRub9BDo4/exec";
+
+let allLeads  = [];
+let curFilter = "all";
+
+// ── LOAD DATA FROM APPS SCRIPT ────────────────────────────────────────────────
+async function loadLeads() {
+  document.getElementById("mainContent").innerHTML = `
+    <div class="loading"><div class="spinner"></div><p>Loading live data from Google Sheets…</p></div>`;
+  document.getElementById("lastUpdated").textContent = "Refreshing…";
+
+  try {
+    const res  = await fetch(APPS_SCRIPT_URL);
+    const json = await res.json();
+
+    if (!json.success) throw new Error("Script returned error");
+
+    allLeads = json.leads || [];
+    updateStats();
+    render();
+
+    const t = new Date(json.updatedAt);
+    document.getElementById("lastUpdated").textContent =
+      "Updated " + t.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+  } catch (err) {
+    document.getElementById("mainContent").innerHTML = `
+      <div class="error-box">
+        <strong>⚠️ Could not load live data</strong>
+        This dashboard needs your Apps Script to be deployed as a Web App with
+        "Anyone" access. Make sure you've redeployed after pasting the new script.
+        <br><br>Showing sample data below for preview purposes.
+      </div>`;
+    allLeads = getSampleData();
+    updateStats();
+    render();
+    document.getElementById("lastUpdated").textContent = "Sample data (offline)";
+  }
+}
+
+// ── STATS ────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const hot  = allLeads.filter(l => tierKey(l.tier) === "hot").length;
+  const warm = allLeads.filter(l => tierKey(l.tier) === "warm").length;
+  const avg  = allLeads.length ? Math.round(allLeads.reduce((a,l)=>a+l.score,0)/allLeads.length) : 0;
+  const top  = allLeads.length ? Math.max(...allLeads.map(l=>l.score)) : 0;
+  document.getElementById("s-total").textContent = allLeads.length;
+  document.getElementById("s-hot").textContent   = hot;
+  document.getElementById("s-warm").textContent  = warm;
+  document.getElementById("s-avg").textContent   = avg;
+  document.getElementById("s-top").textContent   = top;
+}
+
+// ── FILTER ───────────────────────────────────────────────────────────────────
+function tierKey(tier) {
+  if (!tier) return "cool";
+  const t = tier.toLowerCase();
+  if (t.includes("hot"))  return "hot";
+  if (t.includes("warm")) return "warm";
+  return "cool";
+}
+function setFilter(btn, f) {
+  document.querySelectorAll(".pill").forEach(b => b.classList.remove("on"));
+  btn.classList.add("on");
+  curFilter = f;
+  render();
+}
+function getFiltered() {
+  const q = document.getElementById("searchBox").value.toLowerCase().trim();
+  return allLeads.filter(l => {
+    const tk = tierKey(l.tier);
+    const matchF = curFilter === "all" || tk === curFilter;
+    const matchS = !q || [l.name,l.condition,l.state].join(" ").toLowerCase().includes(q);
+    return matchF && matchS;
+  });
+}
+
+// ── RENDER CARDS ─────────────────────────────────────────────────────────────
+function render() {
+  const leads = getFiltered();
+  const main  = document.getElementById("mainContent");
+
+  if (!leads.length) {
+    main.innerHTML = `<div class="grid"><div class="empty"><p>🔍</p><p style="font-weight:700">No leads match this filter.</p></div></div>`;
+    return;
+  }
+
+  main.innerHTML = `<div class="grid">${leads.map(cardHTML).join("")}</div>`;
+}
+
+function scoreColor(s) {
+  if (s >= 85) return "var(--hot)";
+  if (s >= 70) return "var(--warm)";
+  if (s >= 50) return "var(--cool)";
+  return "var(--muted)";
+}
+
+function ringHTML(score) {
+  const col  = scoreColor(score);
+  const r    = 22, c = 28, circ = 2*Math.PI*r;
+  const dash = circ * (score/100);
+  return `<div class="ring-wrap">
+    <svg width="56" height="56" viewBox="0 0 56 56">
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="#e0ddd8" stroke-width="5"/>
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${col}" stroke-width="5"
+        stroke-dasharray="${circ}" stroke-dashoffset="${circ - dash}" stroke-linecap="round"/>
+    </svg>
+    <div class="ring-inner">
+      <div class="ring-num" style="color:${col}">${score}</div>
+      <div class="ring-lbl">/ 100</div>
+    </div>
+  </div>`;
+}
+
+function cardHTML(l) {
+  const tk   = tierKey(l.tier);
+  const tTag = tk === "hot" ? "🔴 Hot Lead" : tk === "warm" ? "🟡 Warm Lead" : "🔵 Low Priority";
+  const allFlags = [...(l.flags||[]), ...(l.warnings||[]).map(w=>"⚠️ "+w)];
+  const chips = allFlags.slice(0,3).map(f =>
+    `<span class="chip ${f.includes('⚠️')?'warn':''}">${f.replace('⚠️','').replace('✓','').trim().slice(0,30)}</span>`
+  ).join("") + (allFlags.length > 3 ? `<span class="chip">+${allFlags.length-3} more</span>` : "");
+
+  return `<div class="card" onclick="openModal('${l.id}')">
+    <div class="card-stripe ${tk}-stripe"></div>
+    <div class="card-body">
+      <div class="card-row1">
+        <div>
+          <div class="card-name">${l.name}</div>
+          <div class="card-meta-sub">${l.id} · ${l.state}</div>
+        </div>
+        ${ringHTML(l.score)}
+      </div>
+      <div class="condition-tag">${l.condition || "Condition not specified"}</div>
+      <div class="tier-tag ${tk}">${tTag} &nbsp;·&nbsp; Grade ${l.grade}</div>
+      <div class="card-info-grid">
+        <div class="info-cell">Age <strong>${l.age || "—"}</strong></div>
+        <div class="info-cell">Work Status <strong>${shortWork(l.workStatus)}</strong></div>
+        <div class="info-cell">Prior Claim <strong>${l.priorClaim || "—"}</strong></div>
+        <div class="info-cell">Denial Letter <strong>${l.hasDenial || "—"}</strong></div>
+      </div>
+      <div class="factor-chips">${chips}</div>
+    </div>
+    <div class="card-footer">
+      <button class="btn btn-p">View Full Profile</button>
+      <button class="btn btn-o" onclick="event.stopPropagation();copyLead('${l.id}')">Copy</button>
+    </div>
+  </div>`;
+}
+
+function shortWork(w) {
+  if (!w) return "—";
+  if (w.toLowerCase().includes("unemployed")) return "Not Working";
+  if (w.toLowerCase().includes("self")) return "Self-Employed";
+  if (w.toLowerCase().includes("part")) return "Part-Time";
+  if (w.toLowerCase().includes("full")) return "Full-Time";
+  return w.slice(0,14);
+}
+
+// ── MODAL ────────────────────────────────────────────────────────────────────
+function openModal(id) {
+  const l = allLeads.find(x => x.id === id);
+  if (!l) return;
+  const col = scoreColor(l.score);
+  const tk  = tierKey(l.tier);
+  const tTag = tk === "hot" ? "🔴 Hot Lead" : tk === "warm" ? "🟡 Warm Lead" : "🔵 Low Priority";
+  const allFlags = [...(l.flags||[]), ...(l.warnings||[]).map(w=>"⚠️ "+w)];
+
+  document.getElementById("mName").textContent = l.name;
+  document.getElementById("mSub").textContent  = `${l.id} · ${l.state} · ${tTag}`;
+  document.getElementById("mBody").innerHTML = `
+    <div class="score-hero">
+      <div>
+        <div class="score-big" style="color:${col}">${l.score}</div>
+        <div class="score-grade" style="color:${col}">Grade ${l.grade}</div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-label">Case Strength Score</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${l.score}%;background:${col}"></div></div>
+        <div class="score-desc">${scoreDesc(l.score)}</div>
+      </div>
+    </div>
+
+    <div class="msect">
+      <div class="msect-title">Contact Information</div>
+      <div class="detail-grid">
+        <div class="ditem">Phone<strong>${l.phone||"—"}</strong></div>
+        <div class="ditem">Email<strong>${l.email||"—"}</strong></div>
+        <div class="ditem">State<strong>${l.state||"—"}</strong></div>
+        <div class="ditem">Age<strong>${l.age||"—"}</strong></div>
+      </div>
+    </div>
+
+    <div class="msect">
+      <div class="msect-title">Case Details</div>
+      <div class="detail-grid">
+        <div class="ditem">Condition<strong>${l.condition||"—"}</strong></div>
+        <div class="ditem">Work Status<strong>${l.workStatus||"—"}</strong></div>
+        <div class="ditem">Earns Over SGA ($1,690)<strong>${l.overSGA||"—"}</strong></div>
+        <div class="ditem">Prior Claim Filed<strong>${l.priorClaim||"—"}</strong></div>
+        <div class="ditem">Has Denial Letter<strong>${l.hasDenial||"—"}</strong></div>
+        <div class="ditem">Max Sit Time<strong>${l.sitTime||"—"}</strong></div>
+        <div class="ditem">Max Stand Time<strong>${l.standTime||"—"}</strong></div>
+        <div class="ditem">Max Lift Weight<strong>${l.liftWeight||"—"}</strong></div>
+      </div>
+    </div>
+
+    <div class="msect">
+      <div class="msect-title">How Disability Impacts Daily Life</div>
+      <div style="font-size:13px;color:var(--ink);background:var(--bg);padding:12px;border-radius:8px;line-height:1.6">
+        ${l.impact || "Not provided"}
+      </div>
+    </div>
+
+    <div class="msect">
+      <div class="msect-title">Scoring Factors (${allFlags.length} reviewed)</div>
+      <ul class="factor-list">
+        ${allFlags.map(f => `<li>
+          <span class="fi">${f.includes('⚠️') ? '🚩' : '✅'}</span>
+          <span>${f.replace('⚠️','').replace('✓','').trim()}</span>
+        </li>`).join("")}
+      </ul>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-p" onclick="copyLead('${l.id}')">📋 Copy Full Profile</button>
+      <button class="btn btn-o" onclick="closeModal()">Close</button>
+    </div>
+  `;
+  document.getElementById("overlay").classList.add("open");
+}
+function closeModal() { document.getElementById("overlay").classList.remove("open"); }
+document.getElementById("overlay").onclick = (e) => { if (e.target.id==="overlay") closeModal(); };
+
+function scoreDesc(s) {
+  if (s >= 85) return "Strong case — recommend immediate attorney outreach";
+  if (s >= 70) return "Good case — worth pursuing with proper documentation";
+  if (s >= 50) return "Moderate case — may qualify with additional evidence";
+  return "Weak case — significant barriers to approval currently";
+}
+
+// ── COPY ────────────────────────────────────────────────────────────────────
+function copyLead(id) {
+  const l = allLeads.find(x => x.id === id);
+  if (!l) return;
+  const allFlags = [...(l.flags||[]), ...(l.warnings||[]).map(w=>"⚠️ "+w)];
+  const text = `DISABILITY CASE LEAD — ${l.id}
+Score: ${l.score}/100 | Grade: ${l.grade} | Tier: ${l.tier}
+─────────────────────────────────────
+Name:         ${l.name}
+Age:          ${l.age}
+State:        ${l.state}
+Phone:        ${l.phone}
+Email:        ${l.email}
+─────────────────────────────────────
+Condition:    ${l.condition}
+Work Status:  ${l.workStatus}
+Over SGA:     ${l.overSGA}
+Prior Claim:  ${l.priorClaim}
+Denial Ltr:   ${l.hasDenial}
+Max Sit:      ${l.sitTime}
+Max Stand:    ${l.standTime}
+Max Lift:     ${l.liftWeight}
+─────────────────────────────────────
+SCORING FACTORS:
+${allFlags.map(f=>"• "+f.replace('⚠️','⚠ ')).join("\n")}
+─────────────────────────────────────
+Impact: ${l.impact}`;
+  navigator.clipboard.writeText(text).then(() => alert("✅ Profile copied to clipboard!"));
+}
+
+// ── SAMPLE DATA (fallback if Apps Script not reachable) ──────────────────────
+function getSampleData() {
+  return [
+    { id:"DIS-001", name:"VENSON SMITH", state:"Tennessee", age:54, condition:"BACK PAIN 2 SPINAL SURGERIES", phone:"9013404114", email:"vence31@gmail.com", workStatus:"Unemployed/Not working", overSGA:"NO", priorClaim:"Yes", hasDenial:"Yes", sitTime:"0:10:00", standTime:"0:10:00", liftWeight:"10-25 lbs", impact:"MEDICINE MAKES ME DROWSY EVERYDAY", score:88, grade:"A", tier:"🔴 Hot Lead", flags:["Age 54 — grid factor applies","Not currently working ✓","Prior claim + denial letter ✓","Can only sit 10 min ✓","Spinal surgery — expedited review possible ✓"], warnings:[] },
+    { id:"DIS-002", name:"VENCE SMITH", state:"Alabama", age:55, condition:"2 BACK SURGERIES 6 SCREWS IN SPINE", phone:"9017890732", email:"VENCE31@HOTMAIL.COM", workStatus:"Unemployed/Not working", overSGA:"NO", priorClaim:"NO", hasDenial:"NO", sitTime:"0:10:00", standTime:"0:10:00", liftWeight:"Less than 10 lbs", impact:"MEDICINE MAKES ME DROWSY", score:76, grade:"B", tier:"🟡 Warm Lead", flags:["Age 55 — strong grid advantage ✓","Not currently working ✓","Lift <10 lbs — sedentary RFC ✓","Can only sit 10 min ✓"], warnings:["No prior claim — initial stage"] },
+    { id:"DIS-003", name:"NANCY REGAN", state:"Kentucky", age:52, condition:"back pain", phone:"901-555-1212", email:"NOEMAIL@GMAIL.COM", workStatus:"Self-employed", overSGA:"YES", priorClaim:"YES", hasDenial:"YES", sitTime:"0:10:00", standTime:"0:10:00", liftWeight:"Less than 10 lbs", impact:"medicine drowsy", score:55, grade:"C", tier:"🟡 Warm Lead", flags:["Prior claim + denial letter ✓","Lift <10 lbs ✓","Can only sit 10 min ✓"], warnings:["Self-employed & earning above SGA — may disqualify"] }
+  ];
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+loadLeads();
+</script>
+</body>
+</html>
