@@ -1,222 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Disability Case Leads | Attorney Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:      #f8fafc;
-  --bg2:     #ffffff;
-  --bg3:     #f1f5f9;
-  --blue:    #2563eb;
-  --blue-d:  #1d4ed8;
-  --blue-g:  rgba(37, 99, 235, 0.08);
-  --cyan:    #0891b2;
-  --green:   #16a34a;
-  --yellow:  #ca8a04;
-  --red:     #dc2626;
-  --gold:    #b45309;
-  --slate:   #475569;
-  --text:    #0f172a;
-  --muted:   #64748b;
-  --border:  #e2e8f0;
-}
+  <base target="_top">
+  <title>Attorney Intake Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      padding: 40px;
+    }
 
-*,*::before,*::after { box-sizing:border-box; }
-body { margin:0; font-family:'Manrope',sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
+    .header {
+      margin-bottom: 30px;
+    }
 
-header { background:var(--bg2); border-bottom:1px solid var(--border); padding:20px 40px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
-.logo { font-family:'Syne',sans-serif; font-weight:800; font-size:22px; letter-spacing:-0.5px; display:flex; align-items:center; gap:10px; color:var(--blue); }
-.logo span { color:var(--text); }
+    .card {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
 
-.stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; padding:30px 40px; }
-.stat-card { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.02); }
-.stat-label { color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
-.stat-val { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; }
-
-.filter-nav { padding:0 40px 20px; display:flex; gap:10px; }
-.f-btn { background:var(--bg2); border:1px solid var(--border); color:var(--muted); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:700; cursor:pointer; transition:0.2s; }
-.f-btn.active { background:var(--blue); color:white; border-color:var(--blue); }
-
-main { padding:0 40px 60px; display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:25px; }
-
-.card { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:24px; transition:0.3s; position:relative; overflow:hidden; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); }
-.card:hover { border-color:var(--blue); transform:translateY(-3px); box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); }
-
-.grade-badge { position:absolute; top:24px; right:24px; width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:20px; }
-.grade-A { background:rgba(220,38,38,0.1); color:var(--red); border:1px solid rgba(220,38,38,0.2); }
-.grade-B { background:rgba(202,138,4,0.1); color:var(--yellow); border:1px solid rgba(202,138,4,0.2); }
-
-.tier { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
-.t-hot { color:var(--red); }
-.t-warm { color:var(--yellow); }
-
-.c-name { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; margin-bottom:4px; color:var(--text); }
-.c-loc { color:var(--muted); font-size:13px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:5px; }
-
-.tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
-.tag { background:var(--bg3); color:var(--muted); padding:5px 12px; border-radius:6px; font-size:11px; font-weight:700; border:1px solid var(--border); }
-
-.btn-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px; }
-.btn { border-radius:10px; padding:12px; font-size:13px; font-weight:700; text-align:center; cursor:pointer; transition:0.2s; text-decoration:none; font-family:'Manrope',sans-serif; }
-.btn-p { background:var(--blue); color:white; border:none; }
-.btn-p:hover { background:var(--blue-d); }
-.btn-s { background:transparent; color:var(--text); border:1px solid var(--border); }
-.btn-s:hover { background:var(--bg3); }
-
-/* Modal */
-.modal { position:fixed; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px; }
-.m-box { background:var(--bg2); width:100%; max-width:700px; border-radius:24px; border:1px solid var(--border); overflow:hidden; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); }
-.m-head { padding:30px; border-bottom:1px solid var(--border); background:var(--bg3); }
-.m-body { padding:30px; max-height:70vh; overflow-y:auto; }
-
-@media (max-width:768px) {
-  header { padding:15px 20px; }
-  .stats-bar { grid-template-columns:1fr 1fr; padding:20px; }
-  main { grid-template-columns:1fr; padding:0 20px 40px; }
-}
-</style>
+    .title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+  </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">STAYVCS <span>INTAKE PORTAL</span></div>
-  <div id="lastUpdated" style="font-family:'JetBrains Mono'; font-size:11px; color:var(--muted);">SYNCING...</div>
-</header>
-
-<div class="stats-bar">
-  <div class="stat-card">
-    <div class="stat-label">Live Inventory</div>
-    <div class="stat-val" id="stat-total">0</div>
-  </div>
-  <div class="stat-card" style="border-left:4px solid var(--red);">
-    <div class="stat-label">🔴 Elite Tier (Grade A)</div>
-    <div class="stat-val" id="stat-hot" style="color:var(--red);">0</div>
-  </div>
-  <div class="stat-card" style="border-left:4px solid var(--yellow);">
-    <div class="stat-label">🟡 Priority (Grade B)</div>
-    <div class="stat-val" id="stat-warm" style="color:var(--yellow);">0</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">States Active</div>
-    <div class="stat-val" id="stat-states">0</div>
-  </div>
+<div class="header">
+  <h2 id="dashboardTitle">Attorney Intake Dashboard</h2>
 </div>
 
-<div class="filter-nav">
-  <button class="f-btn active" onclick="filterLeads('all', this)">ALL LEADS</button>
-  <button class="f-btn" onclick="filterLeads('hot', this)">ELITE ONLY</button>
-  <button class="f-btn" onclick="filterLeads('warm', this)">PRIORITY ONLY</button>
-</div>
-
-<main id="leadGrid"></main>
-
-<div id="modal" class="modal" onclick="closeModal(event)">
-  <div class="m-box" onclick="event.stopPropagation()">
-    <div class="m-head">
-      <div id="m-tier" class="tier"></div>
-      <div id="m-name" class="c-name" style="font-size:32px;"></div>
-      <div id="m-loc" class="c-loc"></div>
-    </div>
-    <div class="m-body" id="m-body"></div>
-  </div>
-</div>
+<div id="dashboardContainer"></div>
 
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxI9gWvKnXt7E66K144fY44HfXEGYfgnm8vjFXn1VB5zOASAbcOgzk4dKiRub9BDo4/exec";
-let allLeads = [], curFilter = "all";
+document.addEventListener("DOMContentLoaded", function() {
 
-async function loadLeads() {
-  document.getElementById("leadGrid").innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:100px; color:var(--muted); font-family:JetBrains Mono;">LOADING SECURE DATABASE...</div>';
-  try {
-    const res = await fetch(APPS_SCRIPT_URL);
-    const json = await res.json();
-    allLeads = json.leads || [];
-    updateStats();
-    render();
-    document.getElementById("lastUpdated").textContent = "LIVE SYNC: " + new Date().toLocaleTimeString();
-  } catch(e) {
-    document.getElementById("leadGrid").innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:100px; color:var(--red);">CONNECTION ERROR. RETRYING...</div>';
+  const selection = JSON.parse(localStorage.getItem("attorneySelection"));
+
+  if (!selection) {
+    alert("No plan selection found.");
+    return;
   }
+
+  const title = document.getElementById("dashboardTitle");
+
+  if (selection.plan === "state") {
+    title.innerText = "Showing Cases for State: " + selection.state;
+  }
+
+  if (selection.plan === "region") {
+    title.innerText = "Showing Cases for Region: " + selection.region;
+  }
+
+  if (selection.plan === "nation") {
+    title.innerText = "Showing Nationwide Cases";
+  }
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      filterAndRender(data, selection);
+    })
+    .getIntakeData();
+});
+
+function filterAndRender(data, selection) {
+
+  let filteredData = [];
+
+  if (selection.plan === "state") {
+    filteredData = data.filter(row => row.state === selection.state);
+  }
+
+  if (selection.plan === "region") {
+    filteredData = data.filter(row => row.region === selection.region);
+  }
+
+  if (selection.plan === "nation") {
+    filteredData = data;
+  }
+
+  renderDashboard(filteredData);
 }
 
-function updateStats() {
-  document.getElementById("stat-total").textContent = allLeads.length;
-  document.getElementById("stat-hot").textContent = allLeads.filter(l => l.grade === 'A').length;
-  document.getElementById("stat-warm").textContent = allLeads.filter(l => l.grade === 'B').length;
-  document.getElementById("stat-states").textContent = [...new Set(allLeads.map(l => l.state))].length;
+function renderDashboard(data) {
+
+  const container = document.getElementById("dashboardContainer");
+  container.innerHTML = "";
+
+  if (data.length === 0) {
+    container.innerHTML = "<p>No matching intake records found.</p>";
+    return;
+  }
+
+  data.forEach(item => {
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="title">${item.name}</div>
+      <div>State: ${item.state}</div>
+      <div>Region: ${item.region}</div>
+      <div>Score: ${item.score}</div>
+    `;
+
+    container.appendChild(card);
+  });
 }
-
-function filterLeads(f, btn) {
-  curFilter = f;
-  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  render();
-}
-
-function render() {
-  const grid = document.getElementById("leadGrid");
-  let filtered = allLeads;
-  if(curFilter === 'hot') filtered = allLeads.filter(l => l.grade === 'A');
-  if(curFilter === 'warm') filtered = allLeads.filter(l => l.grade === 'B');
-
-  grid.innerHTML = filtered.map(l => `
-    <div class="card">
-      <div class="grade-badge grade-${l.grade}">${l.grade}</div>
-      <div class="tier ${l.grade === 'A' ? 't-hot' : 't-warm'}">
-        ${l.grade === 'A' ? '🔴 ELITE CASE' : '🟡 PRIORITY CASE'}
-      </div>
-      <div class="c-name">${l.name}</div>
-      <div class="c-loc">📍 ${l.state} • ${l.age} Years Old</div>
-      <div class="tags">
-        <div class="tag">${l.condition.substring(0,25)}${l.condition.length>25?'...':''}</div>
-        <div class="tag">Score: ${l.score}%</div>
-      </div>
-      <div class="btn-row">
-        <div class="btn btn-p" onclick="openModal('${l.id}')">View RFC Analysis</div>
-        <a href="tel:${l.phone}" class="btn btn-s">Initiate Contact</a>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openModal(id) {
-  const l = allLeads.find(x => x.id === id);
-  if(!l) return;
-  
-  document.getElementById("m-tier").className = `tier ${l.grade === 'A' ? 't-hot' : 't-warm'}`;
-  document.getElementById("m-tier").textContent = l.tier;
-  document.getElementById("m-name").textContent = l.name;
-  document.getElementById("m-loc").innerHTML = `📍 ${l.state} &nbsp;&nbsp; 🎂 ${l.age} Years Old &nbsp;&nbsp; ⚡ Case Score: ${l.score}%`;
-  
-  document.getElementById("m-body").innerHTML = `
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
-      <div>
-        <h4 style="text-transform:uppercase; font-size:12px; color:var(--muted); margin-bottom:15px;">Clinical Summary</h4>
-        <p style="font-size:15px; line-height:1.6; color:var(--text);">${l.condition}</p>
-        <div style="margin-top:20px; background:var(--bg3); padding:15px; border-radius:12px;">
-          <h5 style="font-size:11px; color:var(--muted); text-transform:uppercase; margin-bottom:10px;">Functional Limitations</h5>
-          <div style="font-family:JetBrains Mono; font-size:13px;">
-            SIT: ${l.sitTime}<br>STAND: ${l.standTime}<br>LIFT: ${l.liftWeight}
-          </div>
-        </div>
-      </div>
-      <div>
-        <h4 style="text-transform:uppercase; font-size:12px; color:var(--muted); margin-bottom:15px;">Qualification Flags</h4>
-        ${l.flags.map(f => `<div style="padding:10px; background:var(--blue-g); border-left:3px solid var(--blue); margin-bottom:8px; font-size:13px; font-weight:600;">${f}</div>`).join('')}
-      </div>
-    </div>
-  `;
-  
-  document.getElementById("modal").style.display = 'flex';
-}
-
-function closeModal(e) { document.getElementById("modal").style.display = 'none'; }
-
-loadLeads();
-setInterval(loadLeads, 60000);
 </script>
+
 </body>
 </html>
