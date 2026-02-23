@@ -1,117 +1,715 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <base target="_top">
-  <title>Attorney Intake Dashboard</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eef2f7;
-      padding: 40px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disability Case Leads | Attorney Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #020617;
+  --bg2:     #0f172a;
+  --bg3:     #1e293b;
+  --blue:    #3b82f6;
+  --blue-d:  #1d4ed8;
+  --blue-g:  rgba(59,130,246,.18);
+  --cyan:    #06b6d4;
+  --green:   #10b981;
+  --yellow:  #f59e0b;
+  --red:     #ef4444;
+  --gold:    #c8973a;
+  --slate:   #334155;
+  --text:    #f8fafc;
+  --muted:   #64748b;
+  --border:  rgba(51,65,85,.7);
+  --mono:    'JetBrains Mono', monospace;
+  --display: 'Syne', sans-serif;
+  --body:    'Manrope', sans-serif;
+  --r:       12px;
+  --hot:     #ef4444;
+  --warm:    #f59e0b;
+  --cool:    #3b82f6;
+}
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(30,58,138,.25) 0%, transparent 42%),
+    radial-gradient(circle at 90% 80%, rgba(6,182,212,.06) 0%, transparent 38%);
+  pointer-events:none; z-index:0;
+}
 
-    .header {
-      margin-bottom: 30px;
-    }
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top:0; z-index:50;
+  background: rgba(2,6,23,.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 36px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topbar::after {
+  content:'';
+  position:absolute; bottom:-1px; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, var(--blue), var(--cyan), var(--blue));
+  opacity:.7;
+}
+.logo { display:flex; align-items:center; gap:12px; }
+.logo-icon {
+  width:38px; height:38px; border-radius:8px;
+  background: linear-gradient(135deg, var(--blue-d), var(--blue));
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 0 16px rgba(59,130,246,.4);
+  font-size:18px; flex-shrink:0;
+}
+.logo-text {
+  font-family: var(--display);
+  font-size: 17px; font-weight:800;
+  color: var(--text);
+  letter-spacing:-.02em;
+}
+.logo-sub {
+  font-family: var(--mono);
+  font-size:9px; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.1em;
+  margin-top:2px;
+}
+.topbar-right { display:flex; align-items:center; gap:12px; }
+.last-updated {
+  font-family:var(--mono); font-size:10px;
+  color:var(--muted); text-transform:uppercase; letter-spacing:.08em;
+}
+.refresh-btn {
+  background: rgba(59,130,246,.12);
+  border: 1px solid rgba(59,130,246,.3);
+  color: var(--blue);
+  padding: 7px 16px; border-radius:20px;
+  font-family:var(--body); font-size:12px; font-weight:700;
+  cursor:pointer; transition:all .2s;
+  letter-spacing:.03em;
+}
+.refresh-btn:hover { background:rgba(59,130,246,.22); border-color:var(--blue); color:#fff; }
 
-    .card {
-      background: white;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    }
+/* ── STATS ROW ── */
+.stats-row {
+  position:relative; z-index:1;
+  background: rgba(15,23,42,.7);
+  border-bottom: 1px solid var(--border);
+  padding: 0 36px 22px;
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+}
+.stat-box {
+  text-align:center; padding:10px 0;
+  border-right:1px solid var(--border);
+  position:relative;
+}
+.stat-box:last-child { border:none; }
+.stat-num {
+  font-family: var(--display);
+  font-size:34px; font-weight:800;
+  color:var(--text); line-height:1;
+}
+.stat-num.hot-c  { color:var(--red); text-shadow:0 0 20px rgba(239,68,68,.4); }
+.stat-num.warm-c { color:var(--yellow); text-shadow:0 0 20px rgba(245,158,11,.3); }
+.stat-num.gold-c { color:var(--gold); text-shadow:0 0 20px rgba(200,151,58,.3); }
+.stat-num.blue-c { color:var(--blue); text-shadow:0 0 20px rgba(59,130,246,.4); }
+.stat-lbl {
+  font-family:var(--mono); font-size:9px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.12em;
+  color:var(--muted); margin-top:5px;
+}
 
-    .title {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-  </style>
+/* ── TOOLBAR ── */
+.toolbar {
+  position:relative; z-index:1;
+  padding: 14px 36px;
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  background: rgba(15,23,42,.5);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter:blur(10px);
+}
+.pill {
+  padding:6px 16px; border-radius:20px;
+  font-size:11px; font-weight:700;
+  cursor:pointer; font-family:var(--body);
+  border:1px solid var(--border);
+  background:transparent; color:var(--muted);
+  transition:all .15s; letter-spacing:.03em;
+  text-transform:uppercase;
+}
+.pill:hover,.pill.on { border-color:var(--blue); color:var(--blue); background:rgba(59,130,246,.1); }
+.pill.hot-pill.on  { border-color:var(--red);    color:var(--red);    background:rgba(239,68,68,.1); }
+.pill.warm-pill.on { border-color:var(--yellow);  color:var(--yellow); background:rgba(245,158,11,.1); }
+.pill.cool-pill.on { border-color:var(--cool);   color:var(--cool);   background:rgba(59,130,246,.08); }
+.search {
+  margin-left:auto;
+  padding:8px 16px 8px 36px; border-radius:20px;
+  border:1px solid var(--border);
+  background: var(--bg2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
+  color:var(--text); font-family:var(--body); font-size:13px;
+  width:240px; outline:none;
+  transition:border-color .15s;
+}
+.search::placeholder { color:var(--muted); }
+.search:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(59,130,246,.12); }
+
+/* ── LOADING ── */
+.loading {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; padding:80px 20px; gap:16px;
+  position:relative; z-index:1;
+}
+.spinner {
+  width:40px; height:40px;
+  border:3px solid var(--border);
+  border-top-color:var(--blue);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  box-shadow:0 0 14px rgba(59,130,246,.3);
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading p { font-family:var(--mono); font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
+
+/* ── ERROR ── */
+.error-box {
+  margin:30px 36px; position:relative; z-index:1;
+  background:rgba(239,68,68,.07);
+  border:1px solid rgba(239,68,68,.25);
+  border-radius:var(--r); padding:20px 24px;
+  font-size:13px; color:#fca5a5;
+}
+.error-box strong { display:block; margin-bottom:6px; font-size:14px; color:var(--red); }
+
+/* ── GRID ── */
+.grid {
+  padding:24px 36px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(330px,1fr));
+  gap:16px;
+  position:relative; z-index:1;
+}
+.empty {
+  grid-column:1/-1; text-align:center; padding:60px;
+  color:var(--muted); font-family:var(--mono);
+  font-size:11px; text-transform:uppercase; letter-spacing:.1em;
+}
+
+/* ── CARD ── */
+.card {
+  background: rgba(15,23,42,.85);
+  backdrop-filter:blur(12px);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden; cursor:pointer;
+  transition:transform .18s, box-shadow .18s, border-color .18s;
+  position:relative;
+}
+.card:hover {
+  transform:translateY(-4px);
+  box-shadow:0 20px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(59,130,246,.2);
+  border-color:rgba(59,130,246,.3);
+}
+.card-stripe { height:3px; }
+.hot-stripe  { background:linear-gradient(90deg,#b91c1c,var(--red),#f87171); box-shadow:0 0 8px rgba(239,68,68,.6); }
+.warm-stripe { background:linear-gradient(90deg,#b45309,var(--yellow),#fcd34d); box-shadow:0 0 8px rgba(245,158,11,.5); }
+.cool-stripe { background:linear-gradient(90deg,var(--blue-d),var(--blue),var(--cyan)); box-shadow:0 0 8px rgba(59,130,246,.4); }
+
+.card-body { padding:16px 16px 12px; }
+.card-row1 { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+.card-name { font-family:var(--display); font-size:15px; font-weight:800; color:var(--text); letter-spacing:-.01em; }
+.card-meta-sub { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:3px; letter-spacing:.06em; }
+
+/* Score ring */
+.ring-wrap { position:relative; width:54px; height:54px; flex-shrink:0; }
+.ring-wrap svg { position:absolute; top:0; left:0; transform:rotate(-90deg); }
+.ring-inner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.ring-num { font-family:var(--display); font-size:14px; font-weight:800; line-height:1; }
+.ring-lbl { font-family:var(--mono); font-size:8px; color:var(--muted); font-weight:500; margin-top:1px; }
+
+.condition-tag {
+  display:inline-block;
+  background:rgba(59,130,246,.1);
+  border:1px solid rgba(59,130,246,.2);
+  color:#93c5fd;
+  font-family:var(--mono); font-size:10px; font-weight:500;
+  padding:3px 9px; border-radius:4px;
+  margin-bottom:10px;
+  max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  letter-spacing:.04em; text-transform:uppercase;
+}
+
+.tier-tag {
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:var(--mono); font-size:10px; font-weight:700;
+  padding:4px 10px; border-radius:20px;
+  margin-bottom:10px; text-transform:uppercase; letter-spacing:.06em;
+}
+.tier-tag.hot  { background:rgba(239,68,68,.1);  border:1px solid rgba(239,68,68,.25);  color:#fca5a5; }
+.tier-tag.warm { background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); color:#fcd34d; }
+.tier-tag.cool { background:rgba(59,130,246,.1); border:1px solid rgba(59,130,246,.25); color:#93c5fd; }
+
+.card-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
+.info-cell { font-size:10px; color:var(--muted); font-family:var(--mono); text-transform:uppercase; letter-spacing:.06em; }
+.info-cell strong { display:block; font-family:var(--body); font-size:12px; color:var(--text); font-weight:700; margin-top:2px; text-transform:none; letter-spacing:0; }
+
+.factor-chips { display:flex; flex-wrap:wrap; gap:4px; padding:10px 0 0; border-top:1px solid var(--border); }
+.chip {
+  font-family:var(--mono); font-size:9px; font-weight:600;
+  padding:2px 8px; border-radius:4px;
+  background:rgba(51,65,85,.6); color:#94a3b8;
+  border:1px solid var(--border); letter-spacing:.04em;
+}
+.chip.warn { background:rgba(239,68,68,.1); color:#fca5a5; border-color:rgba(239,68,68,.2); }
+
+.card-footer {
+  display:flex; gap:8px;
+  padding:10px 16px 14px;
+  border-top:1px solid var(--border);
+}
+.btn { flex:1; padding:8px; border-radius:8px; font-family:var(--body); font-size:12px; font-weight:700; cursor:pointer; border:none; transition:all .15s; letter-spacing:.02em; }
+.btn-p { background:var(--blue-d); color:#fff; box-shadow:0 2px 8px rgba(29,78,216,.35); }
+.btn-p:hover { background:var(--blue); box-shadow:0 4px 14px rgba(59,130,246,.4); }
+.btn-o { background:transparent; border:1px solid var(--border); color:var(--muted); }
+.btn-o:hover { border-color:var(--blue); color:var(--blue); }
+
+/* ── MODAL ── */
+.overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(2,6,23,.8);
+  backdrop-filter:blur(8px);
+  z-index:200; align-items:center; justify-content:center; padding:20px;
+}
+.overlay.open { display:flex; animation:fadeIn .2s ease; }
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+.modal {
+  background: var(--bg2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  max-width:580px; width:100%;
+  max-height:90vh; overflow-y:auto;
+  box-shadow:0 40px 100px rgba(0,0,0,.6), 0 0 0 1px rgba(59,130,246,.15);
+  position:relative;
+  animation:slideUp .25s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+.modal-header {
+  background: rgba(15,23,42,.95);
+  padding:22px 26px 18px;
+  border-radius:16px 16px 0 0;
+  border-bottom:1px solid var(--border);
+  position:relative;
+}
+.modal-header::after {
+  content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--blue),var(--cyan));
+  border-radius:0 0 2px 2px;
+}
+.modal-header h2 { font-family:var(--display); font-size:20px; font-weight:800; color:var(--text); letter-spacing:-.02em; }
+.modal-header p  { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:4px; letter-spacing:.08em; text-transform:uppercase; }
+.mclose {
+  position:absolute; top:16px; right:18px;
+  background:rgba(255,255,255,.08); border:1px solid var(--border); color:var(--muted);
+  width:28px; height:28px; border-radius:50%;
+  font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all .15s;
+}
+.mclose:hover { background:rgba(239,68,68,.15); border-color:var(--red); color:var(--red); }
+.modal-body { padding:22px 26px; }
+
+.score-hero {
+  display:flex; align-items:center; gap:20px;
+  background:rgba(2,6,23,.6);
+  border:1px solid var(--border);
+  border-radius:10px; padding:16px; margin-bottom:20px;
+}
+.score-big { font-family:var(--display); font-size:52px; line-height:1; font-weight:800; }
+.score-grade { font-family:var(--mono); font-size:20px; font-weight:700; margin-top:4px; letter-spacing:.05em; }
+.score-bar-wrap { flex:1; }
+.score-bar-label { font-family:var(--mono); font-size:9px; color:var(--muted); font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:.1em; }
+.bar-bg { height:10px; background:var(--bg3); border-radius:5px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:5px; transition:width .6s ease; }
+.score-desc { font-size:11px; color:var(--muted); margin-top:6px; font-family:var(--mono); letter-spacing:.04em; }
+
+.msect { margin-bottom:18px; }
+.msect-title {
+  font-family:var(--mono); font-size:9px; font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--blue);
+  margin-bottom:10px; padding-bottom:6px;
+  border-bottom:1px solid var(--border);
+}
+.detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.ditem { font-family:var(--mono); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.ditem strong { display:block; font-family:var(--body); font-size:13px; color:var(--text); font-weight:700; margin-top:2px; text-transform:none; letter-spacing:0; }
+
+.factor-list { list-style:none; }
+.factor-list li {
+  display:flex; align-items:flex-start; gap:8px;
+  font-size:12px; padding:7px 0;
+  border-bottom:1px solid var(--border);
+  color:#cbd5e1;
+}
+.factor-list li:last-child { border:none; }
+.fi { font-size:13px; flex-shrink:0; margin-top:1px; }
+
+.impact-box {
+  font-size:13px; color:#94a3b8; line-height:1.7;
+  background:rgba(2,6,23,.6); border:1px solid var(--border);
+  padding:12px 14px; border-radius:8px;
+}
+
+.modal-actions { display:flex; gap:10px; margin-top:18px; }
+.modal-actions .btn { padding:12px; font-size:13px; }
+
+@media(max-width:640px) {
+  .topbar { padding:0 16px; }
+  .stats-row { grid-template-columns:repeat(3,1fr); padding:0 16px 16px; }
+  .toolbar { padding:12px 16px; }
+  .grid { padding:16px; }
+  .search { width:100%; }
+  .modal-body { padding:16px; }
+}
+</style>
 </head>
 <body>
 
-<div class="header">
-  <h2 id="dashboardTitle">Attorney Intake Dashboard</h2>
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">⚖</div>
+    <div>
+      <div class="logo-text">Disability Case Leads</div>
+      <div class="logo-sub">Attorney Dashboard &mdash; Confidential</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="last-updated" id="lastUpdated">Loading...</div>
+    <button class="refresh-btn" onclick="loadLeads()">&#8635; Refresh</button>
+  </div>
 </div>
 
-<div id="dashboardContainer"></div>
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="stat-num blue-c" id="s-total">—</div>
+    <div class="stat-lbl">Total Leads</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num hot-c" id="s-hot">—</div>
+    <div class="stat-lbl">Hot Leads</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num warm-c" id="s-warm">—</div>
+    <div class="stat-lbl">Warm Leads</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num gold-c" id="s-avg">—</div>
+    <div class="stat-lbl">Avg Score</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num" id="s-top" style="color:var(--text)">—</div>
+    <div class="stat-lbl">Top Score</div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="pill on"        data-f="all"  onclick="setFilter(this,'all')">All Leads</button>
+  <button class="pill hot-pill"  data-f="hot"  onclick="setFilter(this,'hot')">Hot Only</button>
+  <button class="pill warm-pill" data-f="warm" onclick="setFilter(this,'warm')">Warm</button>
+  <button class="pill cool-pill" data-f="cool" onclick="setFilter(this,'cool')">Low Priority</button>
+  <input class="search" id="searchBox" placeholder="Search name, condition, state..." oninput="render()">
+</div>
+
+<!-- MAIN -->
+<div id="mainContent">
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Loading live data from Google Sheets...</p>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="mclose" onclick="closeModal()">&#10005;</button>
+      <h2 id="mName">—</h2>
+      <p id="mSub">—</p>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxI9gWvKnXt7E66K144fY44HfXEGYfgnm8vjFXn1VB5zOASAbcOgzk4dKiRub9BDo4/exec";
+let allLeads=[], curFilter="all";
 
-  const selection = JSON.parse(localStorage.getItem("attorneySelection"));
-
-  if (!selection) {
-    alert("No plan selection found.");
-    return;
+async function loadLeads() {
+  document.getElementById("mainContent").innerHTML=`<div class="loading"><div class="spinner"></div><p>Loading live data from Google Sheets...</p></div>`;
+  document.getElementById("lastUpdated").textContent="Refreshing...";
+  try {
+    const res=await fetch(APPS_SCRIPT_URL);
+    const json=await res.json();
+    if(!json.success) throw new Error("error");
+    allLeads=json.leads||[];
+    updateStats(); render();
+    const t=new Date(json.updatedAt);
+    document.getElementById("lastUpdated").textContent="Updated "+t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  } catch(err) {
+    document.getElementById("mainContent").innerHTML=`<div class="error-box"><strong>Could not load live data</strong>Apps Script must be deployed as a Web App with "Anyone" access. Showing sample data.</div>`;
+    allLeads=getSampleData(); updateStats(); render();
+    document.getElementById("lastUpdated").textContent="Sample data (offline)";
   }
-
-  const title = document.getElementById("dashboardTitle");
-
-  if (selection.plan === "state") {
-    title.innerText = "Showing Cases for State: " + selection.state;
-  }
-
-  if (selection.plan === "region") {
-    title.innerText = "Showing Cases for Region: " + selection.region;
-  }
-
-  if (selection.plan === "nation") {
-    title.innerText = "Showing Nationwide Cases";
-  }
-
-  google.script.run
-    .withSuccessHandler(function(data) {
-      filterAndRender(data, selection);
-    })
-    .getIntakeData();
-});
-
-function filterAndRender(data, selection) {
-
-  let filteredData = [];
-
-  if (selection.plan === "state") {
-    filteredData = data.filter(row => row.state === selection.state);
-  }
-
-  if (selection.plan === "region") {
-    filteredData = data.filter(row => row.region === selection.region);
-  }
-
-  if (selection.plan === "nation") {
-    filteredData = data;
-  }
-
-  renderDashboard(filteredData);
 }
 
-function renderDashboard(data) {
+function updateStats() {
+  const hot =allLeads.filter(l=>tierKey(l.tier)==="hot").length;
+  const warm=allLeads.filter(l=>tierKey(l.tier)==="warm").length;
+  const avg =allLeads.length?Math.round(allLeads.reduce((a,l)=>a+l.score,0)/allLeads.length):0;
+  const top =allLeads.length?Math.max(...allLeads.map(l=>l.score)):0;
+  document.getElementById("s-total").textContent=allLeads.length;
+  document.getElementById("s-hot").textContent=hot;
+  document.getElementById("s-warm").textContent=warm;
+  document.getElementById("s-avg").textContent=avg;
+  document.getElementById("s-top").textContent=top;
+}
 
-  const container = document.getElementById("dashboardContainer");
-  container.innerHTML = "";
-
-  if (data.length === 0) {
-    container.innerHTML = "<p>No matching intake records found.</p>";
-    return;
-  }
-
-  data.forEach(item => {
-
-    const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
-      <div class="title">${item.name}</div>
-      <div>State: ${item.state}</div>
-      <div>Region: ${item.region}</div>
-      <div>Score: ${item.score}</div>
-    `;
-
-    container.appendChild(card);
+function tierKey(tier) {
+  if(!tier) return "cool";
+  const t=tier.toLowerCase();
+  if(t.includes("hot"))  return "hot";
+  if(t.includes("warm")) return "warm";
+  return "cool";
+}
+function setFilter(btn,f) {
+  document.querySelectorAll(".pill").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on"); curFilter=f; render();
+}
+function getFiltered() {
+  const q=document.getElementById("searchBox").value.toLowerCase().trim();
+  return allLeads.filter(l=>{
+    const tk=tierKey(l.tier);
+    const matchF=curFilter==="all"||tk===curFilter;
+    const matchS=!q||[l.name,l.condition,l.state].join(" ").toLowerCase().includes(q);
+    return matchF&&matchS;
   });
 }
-</script>
 
+function render() {
+  const leads=getFiltered();
+  const main=document.getElementById("mainContent");
+  if(!leads.length){
+    main.innerHTML=`<div class="grid"><div class="empty">No leads match this filter.</div></div>`;
+    return;
+  }
+  main.innerHTML=`<div class="grid">${leads.map(cardHTML).join("")}</div>`;
+}
+
+function scoreColor(s) {
+  if(s>=85) return "var(--red)";
+  if(s>=70) return "var(--yellow)";
+  if(s>=50) return "var(--cool)";
+  return "var(--muted)";
+}
+function scoreGlow(s) {
+  if(s>=85) return "rgba(239,68,68,.5)";
+  if(s>=70) return "rgba(245,158,11,.4)";
+  if(s>=50) return "rgba(59,130,246,.4)";
+  return "transparent";
+}
+
+function ringHTML(score) {
+  const col=scoreColor(score);
+  const r=21,c=27,circ=2*Math.PI*r;
+  const dash=circ*(score/100);
+  return `<div class="ring-wrap">
+    <svg width="54" height="54" viewBox="0 0 54 54">
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="rgba(51,65,85,.6)" stroke-width="4"/>
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${col}" stroke-width="4"
+        stroke-dasharray="${circ}" stroke-dashoffset="${circ-dash}" stroke-linecap="round"
+        filter="drop-shadow(0 0 4px ${scoreGlow(score)})"/>
+    </svg>
+    <div class="ring-inner">
+      <div class="ring-num" style="color:${col}">${score}</div>
+      <div class="ring-lbl">/ 100</div>
+    </div>
+  </div>`;
+}
+
+function cardHTML(l) {
+  const tk=tierKey(l.tier);
+  const tLabel=tk==="hot"?"Hot Lead":tk==="warm"?"Warm Lead":"Low Priority";
+  const allFlags=[...(l.flags||[]),...(l.warnings||[]).map(w=>"⚠ "+w)];
+  const chips=allFlags.slice(0,3).map(f=>
+    `<span class="chip ${f.includes('⚠')?'warn':''}">${f.replace('⚠','').replace('✓','').trim().slice(0,28)}</span>`
+  ).join("")+(allFlags.length>3?`<span class="chip">+${allFlags.length-3} more</span>`:"");
+
+  return `<div class="card" onclick="openModal('${l.id}')">
+    <div class="card-stripe ${tk}-stripe"></div>
+    <div class="card-body">
+      <div class="card-row1">
+        <div>
+          <div class="card-name">${l.name}</div>
+          <div class="card-meta-sub">${l.id} &middot; ${l.state}</div>
+        </div>
+        ${ringHTML(l.score)}
+      </div>
+      <div class="condition-tag">${l.condition||"Condition not specified"}</div>
+      <div class="tier-tag ${tk}">${tLabel} &nbsp;&middot;&nbsp; Grade ${l.grade}</div>
+      <div class="card-info-grid">
+        <div class="info-cell">Age<strong>${l.age||"—"}</strong></div>
+        <div class="info-cell">Work Status<strong>${shortWork(l.workStatus)}</strong></div>
+        <div class="info-cell">Prior Claim<strong>${l.priorClaim||"—"}</strong></div>
+        <div class="info-cell">Denial Letter<strong>${l.hasDenial||"—"}</strong></div>
+      </div>
+      <div class="factor-chips">${chips}</div>
+    </div>
+    <div class="card-footer">
+      <button class="btn btn-p">View Full Profile</button>
+      <button class="btn btn-o" onclick="event.stopPropagation();copyLead('${l.id}')">Copy</button>
+    </div>
+  </div>`;
+}
+
+function shortWork(w) {
+  if(!w) return "—";
+  if(w.toLowerCase().includes("unemployed")) return "Not Working";
+  if(w.toLowerCase().includes("self")) return "Self-Employed";
+  if(w.toLowerCase().includes("part")) return "Part-Time";
+  if(w.toLowerCase().includes("full")) return "Full-Time";
+  return w.slice(0,14);
+}
+
+function openModal(id) {
+  const l=allLeads.find(x=>x.id===id);
+  if(!l) return;
+  const col=scoreColor(l.score);
+  const tk=tierKey(l.tier);
+  const tLabel=tk==="hot"?"Hot Lead":tk==="warm"?"Warm Lead":"Low Priority";
+  const allFlags=[...(l.flags||[]),...(l.warnings||[]).map(w=>"⚠ "+w)];
+
+  document.getElementById("mName").textContent=l.name;
+  document.getElementById("mSub").textContent=`${l.id} · ${l.state} · ${tLabel} · Grade ${l.grade}`;
+  document.getElementById("mBody").innerHTML=`
+    <div class="score-hero">
+      <div>
+        <div class="score-big" style="color:${col};text-shadow:0 0 30px ${scoreGlow(l.score)}">${l.score}</div>
+        <div class="score-grade" style="color:${col}">Grade ${l.grade}</div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-label">Case Strength Score</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${l.score}%;background:${col};box-shadow:0 0 8px ${scoreGlow(l.score)}"></div></div>
+        <div class="score-desc">${scoreDesc(l.score)}</div>
+      </div>
+    </div>
+
+    <div class="msect">
+      <div class="msect-title">Contact Information</div>
+      <div class="detail-grid">
+        <div class="ditem">Phone<strong>${l.phone||"—"}</strong></div>
+        <div class="ditem">Email<strong>${l.email||"—"}</strong></div>
+        <div class="ditem">State<strong>${l.state||"—"}</strong></div>
+        <div class="ditem">Age<strong>${l.age||"—"}</strong></div>
+      </div>
+    </div>
+
+    <div class="msect">
+      <div class="msect-title">Case Details</div>
+      <div class="detail-grid">
+        <div class="ditem">Condition<strong>${l.condition||"—"}</strong></div>
+        <div class="ditem">Work Status<strong>${l.workStatus||"—"}</strong></div>
+        <div class="ditem">Earnings Over SGA<strong>${l.overSGA||"—"}</strong></div>
+        <div class="ditem">Prior Claim Filed<strong>${l.priorClaim||"—"}</strong></div>
+        <div class="ditem">Has Denial Letter<strong>${l.hasDenial||"—"}</strong></div>
+        <div class="ditem">Max Sit Time<strong>${l.sitTime||"—"}</strong></div>
+        <div class="ditem">Max Stand Time<strong>${l.standTime||"—"}</strong></div>
+        <div class="ditem">Max Lift Weight<strong>${l.liftWeight||"—"}</strong></div>
+      </div>
+    </div>
+
+    <div class="msect">
+      <div class="msect-title">How Disability Impacts Daily Life</div>
+      <div class="impact-box">${l.impact||"Not provided"}</div>
+    </div>
+
+    <div class="msect">
+      <div class="msect-title">Scoring Factors (${allFlags.length} reviewed)</div>
+      <ul class="factor-list">
+        ${allFlags.map(f=>`<li>
+          <span class="fi">${f.includes('⚠')?'🚩':'✅'}</span>
+          <span>${f.replace('⚠','').replace('✓','').trim()}</span>
+        </li>`).join("")}
+      </ul>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-p" onclick="copyLead('${l.id}')">Copy Full Profile</button>
+      <button class="btn btn-o" onclick="closeModal()">Close</button>
+    </div>`;
+
+  document.getElementById("overlay").classList.add("open");
+}
+
+function closeModal() { document.getElementById("overlay").classList.remove("open"); }
+document.getElementById("overlay").onclick=e=>{ if(e.target.id==="overlay") closeModal(); };
+
+function scoreDesc(s) {
+  if(s>=85) return "Strong case — recommend immediate attorney outreach";
+  if(s>=70) return "Good case — worth pursuing with proper documentation";
+  if(s>=50) return "Moderate case — may qualify with additional evidence";
+  return "Weak case — significant barriers to approval currently";
+}
+
+function copyLead(id) {
+  const l=allLeads.find(x=>x.id===id);
+  if(!l) return;
+  const allFlags=[...(l.flags||[]),...(l.warnings||[]).map(w=>"⚠ "+w)];
+  const text=`DISABILITY CASE LEAD — ${l.id}
+Score: ${l.score}/100 | Grade: ${l.grade} | Tier: ${l.tier}
+─────────────────────────────────────
+Name:         ${l.name}
+Age:          ${l.age}
+State:        ${l.state}
+Phone:        ${l.phone}
+Email:        ${l.email}
+─────────────────────────────────────
+Condition:    ${l.condition}
+Work Status:  ${l.workStatus}
+Over SGA:     ${l.overSGA}
+Prior Claim:  ${l.priorClaim}
+Denial Ltr:   ${l.hasDenial}
+Max Sit:      ${l.sitTime}
+Max Stand:    ${l.standTime}
+Max Lift:     ${l.liftWeight}
+─────────────────────────────────────
+SCORING FACTORS:
+${allFlags.map(f=>"• "+f.replace('⚠','')).join("\n")}
+─────────────────────────────────────
+Impact: ${l.impact}`;
+  navigator.clipboard.writeText(text).then(()=>alert("Profile copied to clipboard!"));
+}
+
+function getSampleData() {
+  return [
+    {id:"DIS-001",name:"VENSON SMITH",state:"Tennessee",age:54,condition:"BACK PAIN 2 SPINAL SURGERIES",phone:"9013404114",email:"vence31@gmail.com",workStatus:"Unemployed/Not working",overSGA:"NO",priorClaim:"YES",hasDenial:"YES",sitTime:"10 Minutes Or Less",standTime:"10 Minutes Or Less",liftWeight:"10-25 lbs",impact:"Medicine makes me drowsy every day. Cannot focus or function.",score:90,grade:"A",tier:"Hot Lead",flags:["Age 54 — grid factor applies","Not currently working","Prior claim + denial letter — ALJ hearing eligible","Can only sit 10 min — severe limitation","Spinal surgery — expedited review possible"],warnings:[]},
+    {id:"DIS-002",name:"MARCUS JOHNSON",state:"Mississippi",age:58,condition:"PTSD — MILITARY SERVICE",phone:"6015550102",email:"mjohnson@email.com",workStatus:"Unemployed/Not working",overSGA:"NO",priorClaim:"YES",hasDenial:"YES",sitTime:"15 Minutes Or Less",standTime:"15 Minutes Or Less",liftWeight:"Less than 10 lbs",impact:"Cannot be in crowds. Panic attacks daily. Sleep disorder.",score:95,grade:"A",tier:"Hot Lead",flags:["Age 58 — strong grid advantage","Not currently working","Prior claim + denial letter","Lift under 10 lbs — sedentary RFC","PTSD — service connected"],warnings:[]},
+    {id:"DIS-003",name:"LINDA CARTER",state:"Alabama",age:52,condition:"HEART FAILURE — STAGE 3",phone:"2055550199",email:"lcarter@email.com",workStatus:"Unemployed/Not working",overSGA:"NO",priorClaim:"NO",hasDenial:"NO",sitTime:"30 Minutes Or Less",standTime:"15 Minutes Or Less",liftWeight:"Less than 10 lbs",impact:"Shortness of breath walking 20 feet. Cannot climb stairs.",score:76,grade:"B",tier:"Warm Lead",flags:["Age 52 — approaching grid threshold","Not currently working","Lift under 10 lbs","Heart failure — may qualify for compassionate allowance"],warnings:["No prior claim — initial application stage"]}
+  ];
+}
+
+loadLeads();
+</script>
 </body>
 </html>
